@@ -1,0 +1,256 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><HEAD>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
+<title>蚁群算法js版</title>
+<style>
+.ant{
+position:absolute;
+background-color:#000000;
+overflow:hidden;
+width:2px;
+height:2px;
+}
+.food{
+background-color:#0000ff;
+overflow:hidden;
+width:200px;
+height:200px;
+}
+
+</style>
+<script type="text/JavaScript">
+var $ = function(id) {return document.getElementById(id)};
+var dc = function(tag) {return document.createElement(tag)};
+var mapLeft = 0;
+var mapTop = 0;
+var mapRight = 400;
+var mapBottom = 400;
+var infoRange = 5;
+antNum = 250;
+function AntColonyAlgo(){
+	this.foodPosX = 300;
+	this.foodPosY = 300;
+	this.nestPosX = 100;
+	this.nestPosY = 100;
+	this.foodInfoTable = new Array();
+	this.nestInfoTable = new Array();
+	
+	for(i = 0; i < mapBottom; i ++){
+		this.foodInfoTable[i] = new Array();
+		this.nestInfoTable[i] = new Array();
+		//this.visitInfoTable[i] = new Array();
+	}
+	for(j = 0; j < mapBottom; j ++){
+		for(i = 0; i < mapRight; i ++){
+			this.foodInfoTable[j][i] = 0;
+			this.nestInfoTable[j][i] = 0;
+			//this.visitInfoTable[j][i] = 0;
+		}
+	}
+	this.initFood = function(){
+		this.food = dc("div");
+		this.food.style.position = "absolute";
+		this.food.style.top = this.foodPosY + "px";
+		this.food.style.left = this.foodPosX + "px";
+		this.food.style.width = "20px";
+		this.food.style.height = "20px";
+		this.food.style.backgroundColor = "#0000ff";
+		document.body.appendChild(this.food);
+	}
+	this.initNest = function(){
+		this.nest = dc("div");
+		this.nest.style.position = "absolute";
+		this.nest.style.top = this.nestPosY + "px";
+		this.nest.style.left = this.nestPosX  + "px";
+		this.nest.style.width = "20px";
+		this.nest.style.height = "20px";
+		this.nest.style.backgroundColor = "#ff0000";
+		document.body.appendChild(this.nest);
+	}
+	this.Start = function(){
+		this.initFood();
+		this.initNest();
+		var antArray = new Array();
+		for(i = 0; i < antNum; i ++){
+			//alert(i);
+			antArray[i] = new ant(this.nestPosX, this.nestPosY, this.foodInfoTable, this.nestInfoTable, this.foodPosX, this.foodPosY, this.nestPosX, this.nestPosY);
+		}
+	}
+
+	function ant(x, y, foodInfo, nestInfo, fPosX, fPosY, nPosx, nPosY){
+	//	this.antShape="";
+	//	this.direction = 0;
+		this.foodInfo = foodInfo;
+		this.nestInfo = nestInfo;
+		this.initPosX = x;
+		this.initPosY = y;
+		this.curPosX = x;
+		this.curPosY = y;
+		this.dst = 1;		//1:food 2:nest;
+		this.isFoundFood = false;
+		this.isFoundNest = false;
+		this.foodPosX = fPosX;
+		this.foodPosY = fPosY;
+		this.nestPosX = nPosx;
+		this.nestPosY = nPosY;
+		this.moveDistArray = new Array([-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1], [0,0]);
+		this.visitInfoTable = new Array();
+		for(jk = 0; jk < mapBottom; jk ++){
+			this.visitInfoTable[jk] = new Array();
+		}
+		for(jk = 0; jk < mapBottom; jk ++){
+			for(km = 0; km < mapRight; km ++){
+				this.visitInfoTable[jk][km] = 0;
+			}
+		}
+		this.Init = function(){
+			this.antShape=dc("div");
+			this.antShape.style.position = "absolute";
+			this.antShape.style.top = this.initPosY + "px";
+			this.antShape.style.left = this.initPosX +"px";
+			this.antShape.style.width = "2px";
+			this.antShape.style.height = "2px";
+			this.antShape.style.backgroundColor = "#00003f";
+			document.body.appendChild(this.antShape);
+			/*
+						0 1  2
+						3 me 4
+						5 6  7
+			
+			*/
+			this.direction = Math.floor(Math.random()*8);
+			this.lastDirection = this.direction;
+		}
+
+		this.CheckTarget = function(){
+		
+			if(this.dst == 1){
+				for(j = 0; j < 9; j ++){
+					if(this.curPosX + this.moveDistArray[j][0] == this.foodPosX && this.curPosY + this.moveDistArray[j][1] == this.foodPosY){
+						this.isFoundFood = true;
+						this.isFoundNest = false;
+						this.dst = 2;
+						this.antShape.style.backgroundColor = "#ff0000";
+						for(jk = 0; jk < mapBottom; jk ++){
+							for(km = 0; km < mapRight; km ++){
+								this.visitInfoTable[jk][km] = 0;
+							}
+						}
+					}
+				}
+			}else if(this.dst == 2){
+				for(j = 0; j < 9; j ++){
+					if(this.curPosX + this.moveDistArray[j][0] == this.nestPosX && this.curPosY + this.moveDistArray[j][1] == this.nestPosY){
+						this.isFoundFood = false;
+						this.isFoundNest = true;
+						this.dst = 1;
+						this.antShape.style.backgroundColor = "#00ff00";
+						for(jk = 0; jk < mapBottom; jk ++){
+							for(km = 0; km < mapRight; km ++){
+								this.visitInfoTable[jk][km] = 0;
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		this.ReleaseInfo = function(){
+			if(this.isFoundFood){
+				tmpInfo = (1000 - Math.abs(this.foodPosX - this.curPosX) - Math.abs(this.foodPosY - this.curPosY));
+				//if(tmpInfo > this.foodInfo[this.curPosY][this.curPosX]){
+					this.foodInfo[this.curPosY][this.curPosX] = tmpInfo;
+				//}
+			}
+			if(this.isFoundNest){
+				this.nestInfo[this.curPosY][this.curPosX] = (1000 - Math.abs(this.nestPosX - this.curPosX) - Math.abs(this.nestPosY - this.curPosY));	
+			}
+		}
+		this.GetNextDirection = function(){
+			var maxInfo = 0;
+			var direct = -1;
+			if(this.dst == 1){
+				for(j = 0; j < 8; j ++){
+					tryPosX = this.curPosX + this.moveDistArray[j][0];
+					tryPosY = this.curPosY + this.moveDistArray[j][1];
+					if(tryPosX > mapLeft && tryPosX < mapRight && tryPosY > mapTop && tryPosY < mapBottom){
+						if(this.foodInfo[tryPosY][tryPosX] > maxInfo){
+							maxInfo = this.foodInfo[tryPosY][tryPosX];
+							direct = j;
+						}
+					}
+				}
+				
+			}else if(this.dst ==2){
+				for(j = 0; j < 8; j ++){
+					tryPosX = this.curPosX + this.moveDistArray[j][0];
+					tryPosY = this.curPosY + this.moveDistArray[j][1];
+					if(tryPosX > mapLeft && tryPosX < mapRight && tryPosY > mapTop && tryPosY < mapBottom){
+						if(this.nestInfo[tryPosY][tryPosX] > maxInfo){
+							maxInfo = this.nestInfo[tryPosY][tryPosX];
+							direct = j;
+						}
+					}
+				} 
+			
+			}
+			if(maxInfo != 0){
+				this.direction = direct;
+			}
+			//to have some oppunity to change direction for ants;
+			var littleChangeDirection = -1;
+			littleChangeDirection = Math.floor(Math.random()*16);
+			if(littleChangeDirection == 0){
+				this.direction = Math.floor(Math.random()*8);
+			}
+		}
+		this.Move = function(){
+			tryPosX = this.curPosX + this.moveDistArray[this.direction][0];
+			tryPosY = this.curPosY + this.moveDistArray[this.direction][1];
+			if((tryPosX > mapLeft)&&(tryPosX < mapRight)&&(tryPosY > mapTop)&&(tryPosY < mapBottom)&&this.visitInfoTable[tryPosY][tryPosX] ==0){
+				//this.CheckTarget();
+				//this.foodInfo[200][200]++;
+				//alert(this.foodInfo[200][200]);
+				this.curPosX += this.moveDistArray[this.direction][0];
+				this.curPosY += this.moveDistArray[this.direction][1];
+				//this.visitInfoTable[this.curPosY][this.curPosX] = 1;
+				//alert(2);
+				this.CheckTarget();
+				this.ReleaseInfo();
+				this.GetNextDirection();
+				//if(tryPosY > 399){
+				//	alert(tryPosY+":"+mapBottom);
+				//}
+				;
+				//alert(3);
+				this.antShape.style.top = this.curPosY + "px";
+				this.antShape.style.left = this.curPosX +"px";
+				if(this.direction + this.lastDirection == 7){
+					this.direction = this.lastDirection;
+				}else{
+					this.lastDirection = this.direction;
+				}
+			}else{
+				this.direction = Math.floor(Math.random()*8);
+			}
+			var that = this;
+			setTimeout(function(){that.Move();}, 30);
+		}
+		this.Init();
+		this.Move();
+		//this.Move();
+	}
+	//alert(this.foodInfoTable[200][200]);
+	this.Start();
+}
+
+</script>
+</head>
+<body scroll="no">
+<script>
+new AntColonyAlgo();
+</script>
+</body>
+</html>
