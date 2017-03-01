@@ -463,7 +463,7 @@ function onTankFired()
 		clearInterval(controlTimerId);
 		zone.removeChild(tank);	
 		//alert("Game Over!");
-		var confirm = window.confirm("玩完了，还想继续吗?");
+		var confirm = window.confirm("Game over, restart ?");
 		//alert(confirm);
 		if(confirm == true){
 			//createEnermyNum = 0;
